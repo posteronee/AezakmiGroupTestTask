@@ -1,8 +1,7 @@
+// ItemLogic.swift
+// AezakmiGroupTestTask
 //
-//  ItemLogic.swift
-//  AezakmiGroupTestTask
-//
-//  Created by Никита Иванов on 10.04.2024.
+// Created by Никита Иванов on 10.04.2024.
 //
 
 import Foundation
@@ -10,72 +9,104 @@ import FirebaseFirestore
 import Combine
 
 class ItemViewModel: ObservableObject {
-    @Published var items: [Item] = []
-    @Published var removalCompleted: Bool = false
+  @Published var items: [Item] = []
+  @Published var removalCompleted: Bool = false
+  @Published var isLoadingMore = false
+  @Published var hasMoreData = true
+  private var lastDocument: DocumentSnapshot?
+  private let db = Firestore.firestore()
+  var sortingOption: SortingOption = .nameAZ
+  private let limit = 10
 
-    func addItems() {
-        let newItems: [Item] = [
-            Item(id: UUID(), name: "Кепка вонючка", number: 228),
-            Item(id: UUID(), name: "Элемент 2", number: 69)
-        ]
+  func getItems() {
+    isLoadingMore = true
 
-        items.append(contentsOf: newItems)
+    var query = db.collection("items").order(by: "number", descending: false)
+    query = query.limit(to: limit)
 
-        let db = Firestore.firestore()
-        let itemsCollection = db.collection("items")
-
-        let batch = db.batch()
-
-        for item in newItems {
-            let newItemRef = itemsCollection.document(item.id.uuidString)
-
-            let itemData: [String: Any] = [
-                "id": item.id.uuidString,
-                "name": item.name,
-                "number": item.number
-            ]
-
-            batch.setData(itemData, forDocument: newItemRef)
-        }
-
-        batch.commit { error in
-            if let error = error {
-                print("error adding data on Firestore: \(error.localizedDescription)")
-            } else {
-                print("data has been added to Firestore successfully")
-            }
-        }
+    if let lastDocument = lastDocument {
+      query = query.start(afterDocument: lastDocument)
     }
 
-    func removeItems() {
-        let db = Firestore.firestore()
-        let itemsCollection = db.collection("items")
+    query.getDocuments { [weak self] (querySnapshot, error) in
+      guard let self = self else { return }
 
-        itemsCollection.getDocuments { (querySnapshot, error) in
-            if let error = error {
-                print("error getting data from Firestore: \(error.localizedDescription)")
-                return
-            }
+      if let error = error {
+        print("Error fetching documents: \(error.localizedDescription)")
+        self.isLoadingMore = false
+        return
+      }
 
-            let batch = db.batch()
+      guard let documents = querySnapshot?.documents else {
+        print("No documents found")
+        self.isLoadingMore = false
+        return
+      }
 
-            querySnapshot?.documents.forEach { document in
-                if let itemId = document.data()["id"] as? String {
-                    let itemRef = itemsCollection.document(itemId)
-                    batch.deleteDocument(itemRef)
-                }
-            }
-
-            batch.commit { error in
-                if let error = error {
-                    print("error deliting data Firestore: \(error.localizedDescription)")
-                } else {
-                    print("data has been deleted from Firestore successfully")
-                    DispatchQueue.main.async {
-                        self.removalCompleted = true
-                    }
-                }
-            }
+      let newItems = documents.compactMap { document -> Item? in
+        guard let id = document.data()["id"] as? String,
+              let name = document.data()["name"] as? String,
+              let number = document.data()["number"] as? Int else {
+          return nil
         }
+
+        return Item(id: id, name: name, number: number, cursor: document)
+      }
+
+      DispatchQueue.main.async {
+        if newItems.isEmpty {
+          self.hasMoreData = false
+        } else {
+          self.items.append(contentsOf: newItems)
+          self.lastDocument = documents.last
+        }
+        self.isLoadingMore = false
+      }
     }
+  }
+
+  func loadMoreItemsIfNeeded(currentItem item: Item) {
+    guard !isLoadingMore && hasMoreData && item == items.last else { return }
+    getItems()
+  }
+
+  func filterItemsBySearchText(_ searchText: String) {
+    if searchText.isEmpty {
+      objectWillChange.send()
+    } else {
+      _ = items.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+      objectWillChange.send()
+    }
+  }
+
+  func sortItems() {
+    switch sortingOption {
+    case .nameAZ:
+      sortByNameAZ()
+    case .nameZA:
+      sortByNameZA()
+    case .number1to100:
+      sortByNumber1to100()
+    case .number100to1:
+      sortByNumber100to1()
+    }
+  }
+}
+
+extension ItemViewModel {
+    func sortByNameAZ() {
+        items.sort { $0.name.localizedCompare($1.name) == .orderedAscending }
+    }
+
+    func sortByNameZA() {
+        items.sort { $0.name.localizedCompare($1.name) == .orderedDescending }
+    }
+    
+    func sortByNumber1to100() {
+        items.sort { $0.number < $1.number }
+  }
+    
+    func sortByNumber100to1() {
+        items.sort { $0.number > $1.number }
+  }
 }

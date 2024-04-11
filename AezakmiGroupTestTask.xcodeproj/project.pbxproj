@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5C07796902487075E5D70E76 /* Pods_AezakmiGroupTestTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5421CFB42D7041FC27C882E /* Pods_AezakmiGroupTestTask.framework */; };
+		A8A9FEEA2BC86DBA00038C8E /* sortingOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8A9FEE92BC86DBA00038C8E /* sortingOption.swift */; };
 		A8CB09E82BC5908D0046B520 /* AezakmiGroupTestTaskApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CB09E72BC5908D0046B520 /* AezakmiGroupTestTaskApp.swift */; };
 		A8CB09EA2BC5908D0046B520 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CB09E92BC5908D0046B520 /* ContentView.swift */; };
 		A8CB09EC2BC5908F0046B520 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A8CB09EB2BC5908F0046B520 /* Assets.xcassets */; };
@@ -21,6 +22,7 @@
 		056BF78ED08194F087A829D8 /* Pods-AezakmiGroupTestTask.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AezakmiGroupTestTask.debug.xcconfig"; path = "Target Support Files/Pods-AezakmiGroupTestTask/Pods-AezakmiGroupTestTask.debug.xcconfig"; sourceTree = "<group>"; };
 		746923C9F74A45765852040B /* Pods-AezakmiGroupTestTask.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AezakmiGroupTestTask.release.xcconfig"; path = "Target Support Files/Pods-AezakmiGroupTestTask/Pods-AezakmiGroupTestTask.release.xcconfig"; sourceTree = "<group>"; };
 		A5421CFB42D7041FC27C882E /* Pods_AezakmiGroupTestTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AezakmiGroupTestTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A8A9FEE92BC86DBA00038C8E /* sortingOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = sortingOption.swift; sourceTree = "<group>"; };
 		A8CB09E42BC5908D0046B520 /* AezakmiGroupTestTask.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AezakmiGroupTestTask.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8CB09E72BC5908D0046B520 /* AezakmiGroupTestTaskApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AezakmiGroupTestTaskApp.swift; sourceTree = "<group>"; };
 		A8CB09E92BC5908D0046B520 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -104,6 +106,7 @@
 			isa = PBXGroup;
 			children = (
 				A8CB09FE2BC5E0560046B520 /* item.swift */,
+				A8A9FEE92BC86DBA00038C8E /* sortingOption.swift */,
 			);
 			path = model;
 			sourceTree = "<group>";
@@ -240,6 +243,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A8CB09FF2BC5E0560046B520 /* item.swift in Sources */,
+				A8A9FEEA2BC86DBA00038C8E /* sortingOption.swift in Sources */,
 				A8CB0A042BC5EE780046B520 /* ItemLogic.swift in Sources */,
 				A8CB09EA2BC5908D0046B520 /* ContentView.swift in Sources */,
 				A8CB09E82BC5908D0046B520 /* AezakmiGroupTestTaskApp.swift in Sources */,

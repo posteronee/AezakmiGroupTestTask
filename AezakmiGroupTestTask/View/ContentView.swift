@@ -8,56 +8,133 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject var itemViewModel = ItemViewModel()
+  @StateObject var itemViewModel = ItemViewModel()
+  @State private var searchText = ""
 
-    var body: some View {
-        VStack {
-            HStack {
-                Button(action: {
-                    itemViewModel.addItems()
-                }, label: {
-                    Text("Add Items to Firestore")
-                })
-                .padding()
+  var filteredItems: [Item] {
+    if searchText.isEmpty {
+      return itemViewModel.items
+    } else {
+      return itemViewModel.items.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+    }
+  }
 
-                Button(action: {
-                    itemViewModel.removeItems()
-                }, label: {
-                    Text("Remove Items from Firestore")
-                })
-                .padding()
-            }
+  var body: some View {
+    VStack {
+      HStack {
+        Image(systemName: "magnifyingglass")
+          .foregroundColor(.gray)
+        TextField("Search by the name", text: $searchText)
+          .padding(.leading, 8)
+        if !searchText.isEmpty {
+          Button(action: {
+            searchText = ""
+          }) {
+            Image(systemName: "xmark.circle.fill")
+              .foregroundColor(.gray)
+              .padding(.trailing, 8)
+          }
+        }
+      }
+      .padding()
+      .background(Color(.systemGray5))
+      .cornerRadius(10)
 
-            List(itemViewModel.items, id: \.id) { item in
-                ItemRowView(item: item)
-            }
-            .padding()
+      HStack {
+        Button(action: {
+          searchText = ""
+        }) {
+          Image(systemName: "globe")
+            .foregroundColor(.black)
+        }
+        Spacer()
+        Menu {
+          Button(action: {
+            if itemViewModel.items.isEmpty { return }
+            itemViewModel.sortingOption = .nameAZ
+            itemViewModel.sortItems()
+          }) {
+            Label("Name: A...Z", systemImage: "arrow.up.arrow.down.circle")
+          }
+
+          Button(action: {
+            if itemViewModel.items.isEmpty { return }
+            itemViewModel.sortingOption = .nameZA
+            itemViewModel.sortItems()
+          }) {
+            Label("Name: Z...A", systemImage: "arrow.up.arrow.down.circle.fill")
+          }
+
+          Button(action: {
+            if itemViewModel.items.isEmpty { return }
+            itemViewModel.sortingOption = .number1to100
+            itemViewModel.sortItems()
+          }) {
+            Label("Number: 1...100", systemImage: "arrow.up.arrow.down.square")
+          }
+
+          Button(action: {
+            if itemViewModel.items.isEmpty { return }
+            itemViewModel.sortingOption = .number100to1
+            itemViewModel.sortItems()
+          }) {
+            Label("Number: 100...1", systemImage: "arrow.up.arrow.down.square.fill")
+          }
+        } label: {
+          Label("Sort by:", systemImage: "arrow.up.and.down.text.horizontal")
+            .foregroundColor(.black)
         }
         .padding()
+      }
+
+      ScrollView {
+        LazyVStack {
+          ForEach(filteredItems.indices, id: \.self) { index in
+            let item = filteredItems[index]
+            ItemView(item: item)
+              .onAppear {
+                if index == filteredItems.count - 1 && !itemViewModel.isLoadingMore {
+                  itemViewModel.loadMoreItemsIfNeeded(currentItem: item)
+                }
+              }
+          }
+          .padding()
+        }
+      }
+
+      if itemViewModel.isLoadingMore {
+        ProgressView()
+          .padding()
+      }
     }
+    .padding()
+    .onAppear {
+      itemViewModel.getItems()
+    }
+  }
 }
 
-struct ItemRowView: View {
-    let item: Item
+struct ItemView: View {
+  let item: Item
 
-    var body: some View {
-        HStack {
-            Text(item.name)
-                .foregroundColor(.blue)
-                .font(.headline)
+  var body: some View {
+    HStack {
+      Text(item.name)
+        .foregroundColor(.blue)
+        .font(.headline)
 
-            Spacer()
+      Spacer()
 
-            Text("\(item.number)")
-                .foregroundColor(.green)
-                .font(.headline)
-        }
-        .padding(10)
+      Text("\(item.number)")
+        .foregroundColor(.green)
+        .font(.headline)
     }
+    .padding(10)
+  }
 }
 
 struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
+  static var previews: some View {
+    ContentView()
+  }
 }
