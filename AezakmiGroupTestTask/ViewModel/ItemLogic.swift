@@ -10,7 +10,6 @@ import Combine
 
 class ItemViewModel: ObservableObject {
   @Published var items: [Item] = []
-  @Published var removalCompleted: Bool = false
   @Published var isLoadingMore = false
   @Published var hasMoreData = true
   private var lastDocument: DocumentSnapshot?
@@ -70,14 +69,13 @@ class ItemViewModel: ObservableObject {
     getItems()
   }
 
-  func filterItemsBySearchText(_ searchText: String) {
-    if searchText.isEmpty {
-      objectWillChange.send()
-    } else {
-      _ = items.filter { $0.name.lowercased().contains(searchText.lowercased()) }
-      objectWillChange.send()
-    }
-  }
+    func filteredItems(searchText: String) -> [Item] {
+        if searchText.isEmpty {
+          return items
+        } else {
+          return items.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+        }
+      }
 
   func sortItems() {
     switch sortingOption {
